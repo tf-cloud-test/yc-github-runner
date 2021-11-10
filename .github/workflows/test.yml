@@ -1,0 +1,55 @@
+name: test action
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  create-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.create-runner.outputs.label }}
+      instance_id: ${{ steps.create-runner.outputs.instance_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Write yc key to file
+        run: echo "${{ secrets.YC_KEYFILE }}" | base64 -d > yc-keyfile.json
+
+      - uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            yandexcloud
+            grpcio
+
+      - id: create-runner
+        uses: ./.github/actions/yc-github-runner
+        with:
+          github_auth_token: ${{ secrets.PAT_GITHUB }}
+          folder_id: ${{ secrets.FOLDER_ID }}
+          sa_json_path: yc-keyfile.json
+          runner_sa: ajevn4hv0j71arsnvo3b
+          image_family: actions-runner
+          subnet_id: e9b2av9mp3qfvu6pglr7
+
+  test:
+    needs: create-runner
+    runs-on: ${{ needs.create-runner.outputs.label }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - run: echo "This runs on the YC runner VM"
+
+      - name: Write yc key to file
+        run: echo "${{ secrets.YC_KEYFILE }}" | base64 -d > yc-keyfile.json
+
+      - id: stop-runner
+        uses: ./.github/actions/yc-github-runner
+        with:
+          action: stop
+          github_auth_token: ${{ secrets.PAT_GITHUB }}
+          sa_json_path: yc-keyfile.json
+          instance_id: ${{ needs.create-runner.outputs.instance_id }}
+        if: always()

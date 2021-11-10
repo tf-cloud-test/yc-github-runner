@@ -1,0 +1,12 @@
+#cloud-config
+runcmd:
+  - >-
+      mkdir -p /actions-runner &&
+      cd /actions-runner &&
+      curl -o actions-runner-linux-x64-{{ runner_ver }}.tar.gz -L https://github.com/actions/runner/releases/download/v{{ runner_ver }}/actions-runner-linux-x64-{{ runner_ver }}.tar.gz &&
+      tar xzf ./actions-runner-linux-x64-{{ runner_ver }}.tar.gz &&
+      ./bin/installdependencies.sh &&
+      RUNNER_ALLOW_RUNASROOT=1 ./config.sh --url https://github.com/{{ repository }} --token {{ registration_token }} --labels {{ runner_name }} --unattended &&
+      ./svc.sh install &&
+      ./svc.sh start &&
+      yc compute instance add-labels $(curl -S -s -X GET http://169.254.169.254/computeMetadata/v1/instance/name -H 'Metadata-Flavor: Google') --labels=gh_ready=1

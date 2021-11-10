@@ -1,0 +1,8 @@
+#cloud-config
+runcmd:
+  - >-
+      cd /actions-runner &&
+      RUNNER_ALLOW_RUNASROOT=1 ./config.sh --url https://github.com/{{ repository }} --token {{ registration_token }} --labels {{ runner_name }} --unattended &&
+      ./svc.sh install &&
+      ./svc.sh start &&
+      yc compute instance add-labels $(curl -S -s -X GET http://169.254.169.254/computeMetadata/v1/instance/name -H 'Metadata-Flavor: Google') --labels=gh_ready=1

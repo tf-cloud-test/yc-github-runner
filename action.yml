@@ -1,0 +1,104 @@
+name: "Ephemeral Yandex Cloud GitHub self-hosted runner"
+description: >-
+  Provides commands to create and destroy Yandex Cloud-based GitHub Action self-hosted runner VM.
+  A cloud-init startup script is used to bootstrap the VM.
+  Fork of related-sciences/gce-github-runner.
+branding:
+  icon: cloud-lightning
+  color: yellow
+inputs:
+  action:
+    description: "`start` or `stop` of the runner"
+    default: start
+    required: true
+  github_auth_token:
+    description: >-
+      GitHub auth token.
+      Needs `repo`/`public_repo` scope: https://docs.github.com/en/rest/reference/actions#self-hosted-runners.
+    required: true
+  folder_id:
+    description: "Yandex Cloud folder ID"
+    required: true
+  sa_json_path:
+    description: "Path to the service account key JSON file."
+    required: true
+  runner_ver:
+    description: "Version of the GitHub Runner"
+    default: "2.278.0"
+    required: true
+  zone:
+    description: "Availability zone"
+    default: "ru-central1-a"
+    required: true
+  name_prefix:
+    description: "VM name prefix for easier identification"
+    default: "gh-runner"
+    required: true
+  memory:
+    description: "Amount of RAM in GB. Yandex Cloud default is 2."
+    required: false
+    default: "2"
+  cores:
+    description: "Amount of CPU cores. Yandex Cloud default is 2."
+    required: false
+    default: "2"
+  disk_size:
+    description: "VM disk size. Default depends on image type."
+    required: false
+    default: "10"
+  runner_sa:
+    description: "Service account to bind to VM."
+    required: true
+  subnet_id:
+    description: "ID of a runner subnet."
+    required: true
+  image_family:
+    description: >-
+      Image family for the operating system for the boot disk to be initialized with.
+    required: false
+  shutdown_timeout:
+    description: "Grace period for the `stop` action, in seconds"
+    default: "30"
+    required: false
+  actions_preinstalled:
+    description: "Whether the image has Runner pre-installed at `/actions-runner`"
+    default: "true"
+    required: false
+  instance_id:
+    description: "Instance ID of created Yandex Cloud Runner VM"
+    default: "placeholder"
+    required: false
+outputs:
+  label:
+    description: >-
+      Unique runner label. This label can be used to request a specific
+      runner for the workflow job.
+    value: ${{ steps.yc-github-runner-script.outputs.label }}
+  instance_id:
+    description: >-
+      Instance ID of the created runner.
+      Required for automatic instance deletion.
+    value: ${{ steps.yc-github-runner-script.outputs.label }}
+runs:
+  using: "composite"
+  steps:
+    - id: yc-github-runner-script
+      run: >
+        python3 ${{ github.action_path }}/action.py
+        --action=${{ inputs.action }}
+        --github_auth_token=${{ inputs.github_auth_token }}
+        --folder-id=${{ inputs.folder_id }}
+        --zone=${{ inputs.zone }}
+        --subnet-id=${{ inputs.subnet_id }}
+        --name-prefix=${{ inputs.name_prefix }}
+        --runner-sa=${{ inputs.runner_sa }}
+        --memory=${{ inputs.memory }}
+        --cores=${{ inputs.cores }}
+        --disk-size=${{ inputs.disk_size }}
+        --image-family=${{ inputs.image_family }}
+        --sa-json-path=${{ inputs.sa_json_path }}
+        --runner-ver=${{ inputs.runner_ver }}
+        --shutdown-timeout=${{ inputs.shutdown_timeout }}
+        --actions-preinstalled=${{ inputs.actions_preinstalled }}
+        --instance-id=${{ inputs.instance_id }}
+      shell: bash
