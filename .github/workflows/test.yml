@@ -11,9 +11,6 @@ jobs:
       label: ${{ steps.create-runner.outputs.label }}
       instance_id: ${{ steps.create-runner.outputs.instance_id }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Write yc key to file
         run: echo "${{ secrets.YC_KEYFILE }}" | base64 -d > yc-keyfile.json
 
@@ -24,7 +21,7 @@ jobs:
             grpcio
 
       - id: create-runner
-        uses: ./.github/actions/yc-github-runner
+        uses: tf-cloud-test/yc-github-runner
         with:
           github_auth_token: ${{ secrets.PAT_GITHUB }}
           folder_id: ${{ secrets.FOLDER_ID }}
@@ -37,16 +34,13 @@ jobs:
     needs: create-runner
     runs-on: ${{ needs.create-runner.outputs.label }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - run: echo "This runs on the YC runner VM"
 
       - name: Write yc key to file
         run: echo "${{ secrets.YC_KEYFILE }}" | base64 -d > yc-keyfile.json
 
       - id: stop-runner
-        uses: ./.github/actions/yc-github-runner
+        uses: tf-cloud-test/yc-github-runner
         with:
           action: stop
           github_auth_token: ${{ secrets.PAT_GITHUB }}
