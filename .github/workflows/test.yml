@@ -21,7 +21,7 @@ jobs:
             grpcio
 
       - id: create-runner
-        uses: tf-cloud-test/yc-github-runner
+        uses: tf-cloud-test/yc-github-runner@master
         with:
           github_auth_token: ${{ secrets.PAT_GITHUB }}
           folder_id: ${{ secrets.FOLDER_ID }}
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: stop-runner
-        uses: tf-cloud-test/yc-github-runner
+        uses: tf-cloud-test/yc-github-runner@master
         with:
           action: stop
           github_auth_token: ${{ secrets.PAT_GITHUB }}
