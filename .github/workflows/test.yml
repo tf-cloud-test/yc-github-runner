@@ -39,15 +39,6 @@ jobs:
       - name: Write yc key to file
         run: echo "${{ secrets.YC_KEYFILE }}" | base64 -d > yc-keyfile.json
 
-      - id: stop-runner
-        uses: tf-cloud-test/yc-github-runner
-        with:
-          action: stop
-          github_auth_token: ${{ secrets.PAT_GITHUB }}
-          sa_json_path: yc-keyfile.json
-          instance_id: ${{ needs.create-runner.outputs.instance_id }}
-        if: always()
-
   remove-runner:
     needs: test
     runs-on: ubuntu-latest
