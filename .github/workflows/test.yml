@@ -37,7 +37,7 @@ jobs:
       - run: echo "This runs on the YC runner VM"
 
   remove-runner:
-    needs: test
+    needs: [create-runner, test]
     runs-on: ubuntu-latest
     steps:
       - uses: BSFishy/pip-action@v1
