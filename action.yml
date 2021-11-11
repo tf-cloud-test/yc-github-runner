@@ -82,7 +82,7 @@ outputs:
     description: >-
       Instance ID of the created runner.
       Required for automatic instance deletion.
-    value: ${{ steps.yc-github-runner-script.outputs.label }}
+    value: ${{ steps.yc-github-runner-script.outputs.instance_id }}
 runs:
   using: "composite"
   steps:
