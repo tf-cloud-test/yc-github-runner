@@ -64,6 +64,10 @@ inputs:
     description: "Whether the image has Runner pre-installed at `/actions-runner`"
     default: "true"
     required: false
+  instance_name:
+    description: "Name of created Yandex Cloud Runner VM"
+    default: "placeholder"
+    required: false
   instance_id:
     description: "Instance ID of created Yandex Cloud Runner VM"
     default: "placeholder"
@@ -100,5 +104,6 @@ runs:
         --runner-ver=${{ inputs.runner_ver }}
         --shutdown-timeout=${{ inputs.shutdown_timeout }}
         --actions-preinstalled=${{ inputs.actions_preinstalled }}
+        --instance-name=${{ inputs.instance_name }}
         --instance-id=${{ inputs.instance_id }}
       shell: bash

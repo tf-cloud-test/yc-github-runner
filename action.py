@@ -66,6 +66,8 @@ def parse_args():
     parser.add_argument(
         '--runner-ver', help='Version of the GitHub Runner.')
     parser.add_argument(
+        '--instance-name', help='YC VM instance name. Required by delete command.')
+    parser.add_argument(
         '--instance-id', help='YC VM instance id. Required by delete command.')
     return parser.parse_args()
 
@@ -170,8 +172,6 @@ def main():
             GetImageLatestByFamilyRequest(
                 folder_id=arguments.folder_id,
                 family=arguments.image_family
-                #folder_id='standard-images',
-                #family='ubuntu-2004-lts'
             )
         )
         instance_id = None
@@ -200,20 +200,9 @@ def main():
             raise Exception('instance_id is undefined.')
 
         logging.info('instance_id: %s' % arguments.instance_id)
-        # Get runner name
-        logging.info('Self-requesting runner name from instance metadata...')
-        url = 'http://169.254.169.254/computeMetadata/v1/instance/name'
-        headers = {'Metadata-Flavor': 'Google'}
-        r = requests.get(url, headers=headers)
-        if not r.ok:
-            logging.error('HTTP' + str(r.status_code))
-            raise Exception('Failed to request runner name.')
-        else:
-            runner_name = r.text
-            logging.info('Runner name (=id) is %s', runner_name)
 
         # Unregister the runner
-        logging.info('Requesting removal of the runner %s' % runner_name)
+        logging.info('Requesting removal of the runner %s' % arguments.instance_name)
         url = 'https://api.github.com/repos/'+str(repository)+'/actions/runners/'+arguments.instance_id
         headers = {'Authorization': 'Bearer %s' % arguments.github_auth_token}
         r = requests.request('DELETE', url, headers=headers)
@@ -221,7 +210,7 @@ def main():
             logging.error('HTTP' + str(r.status_code))
             logging.error('Failed to remove runner from Github; removing the VM.')
         else:
-            logging.info('Successfully unregistered the runner %s' % runner_name)
+            logging.info('Successfully unregistered the runner %s' % arguments.instance_name)
 
         # Delete the instance
         logging.info('Deleting Runner VM.')

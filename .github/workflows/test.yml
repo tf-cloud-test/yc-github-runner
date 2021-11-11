@@ -53,6 +53,7 @@ jobs:
         uses: tf-cloud-test/yc-github-runner@master
         with:
           action: stop
+          instance_name: ${{ needs.create-runner.outputs.label }}
           github_auth_token: ${{ secrets.PAT_GITHUB }}
           sa_json_path: yc-keyfile.json
           instance_id: ${{ needs.create-runner.outputs.instance_id }}
